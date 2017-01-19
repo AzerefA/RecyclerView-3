@@ -23,6 +23,7 @@ import id.sch.smktelkom_mlg.learn.recyclerview3.model.Hotel;
 
 public class MainActivity extends AppCompatActivity implements HotelAdapter.IHotelAdapter {
     public static final String HOTEL = "hotel";
+    private static final int REQUEST_CODE_ADD = 88;
     ArrayList<Hotel> mlist = new ArrayList<>();
     HotelAdapter mAdapter;
 
@@ -36,19 +37,22 @@ public class MainActivity extends AppCompatActivity implements HotelAdapter.IHot
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
-        mAdapter = new HotelAdapter(this,mlist);
+        mAdapter = new HotelAdapter(this, mlist);
         recyclerView.setAdapter(mAdapter);
-                fillData();
+        fillData();
 
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                goAdd();
             }
         });
+    }
+
+    private void goAdd() {
+        startActivityForResult(new Intent(this, InputActivity.class), REQUEST_CODE_ADD);
     }
 
     private void fillData() {
@@ -66,6 +70,10 @@ public class MainActivity extends AppCompatActivity implements HotelAdapter.IHot
                     + resources.getResourceTypeName(id) + '/'
                     + resources.getResourceEntryName(id);
         }
+
+
+
+
         for (int i = 0; i < arJudul.length; i++) {
             mlist.add(new Hotel(arJudul[i], arDeskripsi[i], arDetail[i], arLokasi[i], arFoto[i]));
         }
@@ -78,6 +86,7 @@ public class MainActivity extends AppCompatActivity implements HotelAdapter.IHot
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -95,9 +104,18 @@ public class MainActivity extends AppCompatActivity implements HotelAdapter.IHot
     }
 
     @Override
-    public void doClick(int pos) {
-        Intent intent = new Intent(this , DetailActivity.class);
-        intent.putExtra(HOTEL,mlist.get(pos));
-        startActivity(intent);
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE_ADD && resultCode == RESULT_OK) {
+            Hotel hotel = (Hotel) data.getSerializableExtra(HOTEL);
+            mlist.add(hotel);
+            mAdapter.notifyDataSetChanged();
+        }
     }
-}
+        @Override
+        public void doClick ( int pos){
+            Intent intent = new Intent(this, DetailActivity.class);
+            intent.putExtra(HOTEL, mlist.get(pos));
+            startActivity(intent);
+        }
+    }
